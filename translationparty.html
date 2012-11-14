@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi?key=ABQIAAAAXoJbWei7Y19nejd2lCTViBTI6Z0FsX30pYjIfgcRJQBIXGAB-hTdTRReZQLem9BEeL6mrm0kDJzbHg"></script>
+<script type="text/javascript;version=1.7" src="workflow.js"></script>
+<script type="text/javascript;version=1.7">
+
+    google.load("language", 1);
+
+    var googleTranslate = function(text, fromLang, toLang) {
+        var w = new wf.WorkflowAction();
+        w.invoke = function() {
+            google.language
+                .translate(text, fromLang, toLang, function(result) {
+                    w.result = result;
+                    w.invoked();
+                });
+        };
+        return w;
+    }
+    
+    var translationPartyWorkflow = function(text)
+    {
+        var prevEnglish = text;
+        var equilibrium = false;
+        
+        $("#output").html("");
+        $("#goButton").attr("disabled","disabled");
+        
+        for (var i = 0; i < 20 && !equilibrium; i++) {
+            var action1 = googleTranslate(prevEnglish, "en", "ja");
+            yield action1;
+            
+            var japanese = action1.result.translation;
+            $("#output").append("<div>Japanese: " + japanese + "</div>");
+            
+            var action2 = googleTranslate(japanese, "ja", "en");
+            yield action2;
+            
+            var english = action2.result.translation;
+            $("#output").append("<div>English: " + english + "</div>");
+            
+            equilibrium = english == prevEnglish;
+            prevEnglish = english;
+        }
+        
+        if (equilibrium)
+            $("#output > div:last").css({"color":"#090"});
+        else
+            $("<div>No equilibrium after 20 iterations!</div>")
+				.css({"color":"#900"})
+				.appendTo("#output");
+
+        $("#goButton").removeAttr("disabled");
+    }
+    
+    google.setOnLoadCallback(function() {
+        $("#goButton").click(function() {
+            var text = $("#inputText").val();
+            var workflow = translationPartyWorkflow(text);
+            wf.executeWorkflow(workflow);
+        });
+    });
+
+    var canYield = true;
+
+</script>
+<script type="text/javascript">
+    if (typeof(canYield) == "undefined")
+	{
+		$(document).ready(function() {
+			$("#goButton").click(function() {
+				$("#output").html("");
+				$("<div>Your browser doesn't appear to support generators. (FF2+)</div>")
+					.css({"color": "#900"})
+					.appendTo("#output");
+			});
+		});
+	}
+</script>
+<style>
+body {
+    background: #e0e0e0;
+    margin: 20px;
+    font-family: "Verdana";
+	font-size: 11px;
+	color: #333;
+	line-height: 1.8em;
+}
+#inputText {
+    font-family: "Verdana";
+	font-size: 11px;
+	color: #333;
+    width: 400px;
+}
+#goButton {
+    font-family: "Verdana";
+	font-size: 11px;
+	color: #333;
+    width: 50px;
+}
+#output {
+    margin-top: 20px;
+}
+</style>
+</head>
+<body>
+    <div style="width: 460px; margin: auto;">
+        <div><b>Update: Google deprecated the translation API, so this no longer works!</b></div>
+        <div>Poor man's Translation Party:</div>
+        <div>
+			<input type="text" id="inputText" value="You should use firefox for this demo."/>
+			<input type="button" id="goButton" value="Go"/>
+		</div>
+        <div id="output"></div>
+    </div>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-6041038-1");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+</body>
+</html>

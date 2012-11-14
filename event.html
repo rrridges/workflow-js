@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.5.2.min.js"></script>
+<script type="text/javascript;version=1.7" src="workflow.js"></script>
+<script type="text/javascript;version=1.7">
+
+	var eventWorkflow = function() {		
+		$("#output").append("<div>Hello</div>");
+		yield $("#goButton").workflow("event","click");
+		$("#output").append("<div>World</div>");
+		yield $().workflow("pause", 1000);
+		$("#output").append("<div>Waited 1 second</div>");
+	};
+	
+	$(document).ready(function() {
+		var workflow = eventWorkflow();
+		wf.executeWorkflow(workflow);
+	});
+
+    var canYield = true;
+
+</script>
+<script type="text/javascript">
+    if (typeof(canYield) == "undefined")
+	{
+		$(document).ready(function() {
+			$("#goButton").click(function() {
+				$("#output").html("");
+				$("<div>Your browser doesn't appear to support generators. (FF2+)</div>")
+					.css({"color": "#900"})
+					.appendTo("#output");
+			});
+		});
+	}
+</script>
+<style>
+body {
+    background: #e0e0e0;
+    margin: 20px;
+    font-family: "Verdana";
+	font-size: 11px;
+	color: #333;
+	line-height: 1.8em;
+}
+#inputText {
+    font-family: "Verdana";
+	font-size: 11px;
+	color: #333;
+    width: 400px;
+}
+#goButton {
+    font-family: "Verdana";
+	font-size: 11px;
+	color: #333;
+    width: 100px;
+}
+#output {
+    margin-top: 20px;
+}
+</style>
+</head>
+<body>
+    <div style="width: 460px; margin: auto;">
+        <div>
+			<input type="button" id="goButton" value="Test Event"/>
+		</div>
+        <div id="output"></div>
+    </div>
+</body>
+</html>
